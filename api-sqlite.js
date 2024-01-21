@@ -136,7 +136,7 @@ app.put('/mods/:mod_id', (req, res) => {
         typeof mod_id === 'string') {
             db.run(
                 "UPDATE mods SET mod_name = ?, json = ?, version = ? WHERE mod_id = ?",
-                [mod_name, username, json, version, mod_id],
+                [mod_name, json, version, mod_id],
                 (err) => {
                     if(err) {
                         console.error(err.message);
