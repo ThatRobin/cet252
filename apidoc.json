@@ -1,0 +1,11 @@
+{
+    "name": "Mod DB Documentation",
+    "version": "1.0.0",
+    "description": "This is an API for interacting with my modding system in my python text-based RPG.",
+    "title": "Mod DB API",
+    "header": {
+        "title": "Mod DB API"
+    },
+    "files": ["./api-sqlite.js"],
+    "dest": "./docs/"
+}
