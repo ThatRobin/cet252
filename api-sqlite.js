@@ -10,29 +10,113 @@ var app = express();
 
 app.use(express.json());
 
-app.get('/mods', function(req, res) {
-    db.all("SELECT * FROM mods", function(err, rows){
-        res.jsonp(rows);
-    })
-});
-
-app.post('/mods', (req, res) => {
-    const { mod_name, username, json, version, mod_id } = req.body;
-    db.run("INSERT INTO mods (mod_name, username, json, version, mod_id) VALUES (?, ?, ?, ?, ?)", mod_name, username, json, version, mod_id);
-    res.status(200).json({message: 'Successfully Validated'});
+app.get('/mods', (req, res) => {
+    db.all("SELECT * FROM mods", (err, rows) => {
+        if(err) {
+            console.error(err.message);
+            res.status(500).json({error:'Internal server error'});            
+        } else {
+            res.status(200).json({mods: rows});
+        }
+    });
 });
 
 app.get('/mods/:mod_id', (req, res) => {
     const mod_id = req.params.mod_id;
 
     db.get('SELECT * FROM mods WHERE mod_id = ? LIMIT 1', [mod_id], (err, row) => {
-        console.log(row);
-        res.status(200).json({mod: row});
+        if(err) {
+            console.error(err.message);
+            res.status(500).json({error:'Internal server error'});
+        } else if (!row) {
+            res.status(404).json({error:'Mod not found'});
+        } else {
+            res.status(200).json({mod: row});
+        }
+    });
+});
+
+/**
+ * @api {post} /mods Adds a new mod
+ * @apiNAme AddMod
+ * @apiGroup Mods
+ * 
+ * @apiParam {String} mod_name The name of the mod.
+ * @apiParam {String} username The username of the user who created the mod.
+ * @apiParam {String} json The encoded JSON data of the mod.
+ * @apiParam {String} version The version of the mod.
+ * @apiParam {String} mod_id The unique identiifer of the mod.
+ * 
+ * @apiSuccess {String} message Validation successful. The Mod has been added to the database.
+ * @apiError {String} error the JSON body of the request could not be serialized.
+ */
+
+app.post('/mods', (req, res) => {
+    const { mod_name, username, json, version, mod_id } = req.body;
+    
+    if(mod_name && username && json && version && mod_id &&
+        typeof mod_name === 'string' &&
+        typeof username === 'string' &&
+        typeof json === 'string' &&
+        typeof version === 'string' &&
+        typeof mod_id === 'string') {
+            db.run("INSERT INTO mods (mod_name, username, json, version, mod_id) VALUES (?, ?, ?, ?, ?)", 
+            [mod_name, username, json, version, mod_id],
+            (err) => {
+                if(err) {
+                    console.error(err.message);
+                    res.status(500).json({error:'Internal server error'});
+                } else {
+                    res.status(200).json({message: 'Mod Successfully Uploaded'});
+                }
+            });
+    } else {
+        res.status(400).json({error:'Invalid JSON body'});
+    }
+});
+
+app.put('/mods/:mod_id', (req, res) => {
+    const mod_id = req.params.mod_id;
+    const { mod_name, username, json, version } = req.body;
+
+    if(mod_name && username && json && version && mod_id &&
+        typeof mod_name === 'string' &&
+        typeof username === 'string' &&
+        typeof json === 'string' &&
+        typeof version === 'string' &&
+        typeof mod_id === 'string') {
+            db.run(
+                "UPDATE mods SET mod_name = ?, json = ?, version = ? WHERE mod_id = ?",
+                [mod_name, username, json, version, mod_id],
+                (err) => {
+                    if(err) {
+                        console.error(err.message);
+                        res.status(500).json({error:"Internal server error"});
+                    } else {
+                        res.status(200).json({message: 'Mod Successfully Updated'});
+                    }
+                }
+            );
+    } else {
+        res.status(400).json({error:'Invalid JSON body'});
+    }
+});
+
+app.delete('/mods/:mod_id', (req, res) => {
+    const mod_id = req.params.mod_id;
+
+    db.run("DELETE FROM mods WHERE mod_id = ?", [mod_id], (err) => {
+        if(err) {
+            console.error(err.message);
+            res.status(500).json({error:"Internal server error"});
+        } else {
+            res.status(200).json({message: 'Mod Successfully Deleted'});
+        }
     });
 });
 
 app.listen(4001, () => {
-    console.log('Server has starteed on port 4001');
+    console.log('Server has started on port 4001');
 });
 
 console.log("Up and running...");
