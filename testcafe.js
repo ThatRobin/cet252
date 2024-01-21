@@ -43,8 +43,6 @@ test('PUT /mods/:mod_id - Update a specific mod by mod_id', async (t) => {
     await t.expect(response.data.message).eql('Mod Successfully Updated');
 });
 
-
-
 test('DELETE /mods/:mod_id - Delete a specific mod by mod_id', async (t) => {
     const response = await axios.delete('http://localhost:4001/mods/test_mod');
 
