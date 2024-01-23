@@ -1,0 +1,8 @@
+{
+    "name": "Giant Spider Queen",
+    "stats": {
+        "initiative": 1,
+        "attack": 5,
+        "defense": 4
+    }
+}

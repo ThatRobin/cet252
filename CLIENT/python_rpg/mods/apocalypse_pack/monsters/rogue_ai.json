@@ -1,0 +1,8 @@
+{
+    "name": "Rogue AI",
+    "stats": {
+        "initiative": 1,
+        "attack": 3,
+        "defense": 2
+    }
+}
