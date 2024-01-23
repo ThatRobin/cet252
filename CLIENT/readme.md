@@ -15,4 +15,8 @@ To run this project, use the following command:
 ```bash
 python -m python_rpg.main
 ```
+or
+```bash
+python3 -m python_rpg.main
+```
 or, if you are using this in an IDE, simply execute the main.py script.
