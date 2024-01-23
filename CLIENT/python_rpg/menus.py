@@ -5,24 +5,33 @@ from screen import Screen
 from urllib.request import Request, urlopen
 from urllib.error import HTTPError
 import json
+import sys
 
 API_URL = 'http://localhost:4001/mods'
 
+script_dir = os.path.dirname(os.path.realpath(__file__))
+sys.path.append(script_dir)
+os.chdir(script_dir)
 
 def installMod():
     mod_id = input("Enter Mod ID: ")
+    base_path = "mods"
+    file_name = "mod.metadata"
     try:
-        response = urlopen(f'{API_URL}/{mod_id}')
+        response = getMod(mod_id)
         data = json.loads(response.read().decode('utf-8'))["mod"]
         if data:
             temp = data.pop("json", None)
-            os.makedirs(os.path.dirname(f"mods/{mod_id}/mod.metadata"), exist_ok=True)
-            with open(f"mods/{mod_id}/mod.metadata", 'w') as json_file:
+            path = os.path.join(base_path, mod_id, file_name)
+            os.makedirs(os.path.dirname(path), exist_ok=True)
+            with open(path, 'w') as json_file:
                 json.dump(data, json_file, indent=4)
-            json_array = json.loads(temp.replace("'", "\""))
+            
+            temp = temp.replace("\\\"", "?").replace("'", "\"").replace("?", "'")
+            json_array = json.loads(temp)
+            print(json_array)
             for mod in json_array:
                 file_path = mod.pop("path", None)
-
                 if file_path:
                     print(f"Downloading mod file: {file_path}")
                     # Create the directory if it doesn't exist
@@ -37,6 +46,14 @@ def installMod():
     except HTTPError as e:
         print(f"Error: {e.code} - {e.reason}")
 
+def getMod(mod_id):
+    response = None
+    try:
+        response = urlopen(f'{API_URL}/{mod_id}')
+    except HTTPError as e:
+        print(f"Error: {e.code} - {e.reason}")
+        response = e
+    return response
 
 def updateMod():
     mod_id = input("Enter Mod ID to Update: ")
@@ -44,17 +61,21 @@ def updateMod():
     mod_data = get_mod_metadata(mod_id)
     mod_data["json"] = str(get_local_mod(mod_id))
 
+    response = putMod(mod_id, mod_data)
+    if response is not None:
+        print(json.loads(response.read().decode('utf-8'))["message"])
+
+
+def putMod(mod_id, mod_data):
     response = None
     try:
         req = Request(f'{API_URL}/{mod_id}', method='PUT', data=json.dumps(mod_data).encode('utf-8'),
                       headers={'Content-Type': 'application/json'})
         response = urlopen(req)
-        print(json.loads(response.read().decode('utf-8'))["message"])
     except HTTPError as e:
-        err = f"Error: {e.code} - {e.reason} "
-        if response is not None:
-            err += f"{json.loads(response.read().decode('utf-8'))['message']}"
-        print(err)
+        print(f"Error: {e.code} - {e.reason} ")
+        response = e
+    return response
 
 
 def listRemoteMods():
@@ -69,7 +90,23 @@ def listRemoteMods():
 
 
 def listLocalMods():
-    print("Listing local mods")
+    print("Getting All Mods:")
+    print("-" * 30)
+    try:
+        mods = []
+        for root, dirs, files in os.walk("mods"):
+            for file_name in files:
+                if file_name == "mod.metadata":
+                    file_path = os.path.join(root, file_name)
+                    with open(file_path, "r") as file:
+                        try:
+                            json_data = json.load(file)
+                            mods.append(json_data)
+                        except json.JSONDecodeError as e:
+                            print(f"Error decoding JSON in file {file_path}")
+        print_mods(mods)
+    except HTTPError as e:
+        print(f"Error: {e.code} - {e.reason}")
 
 
 def exitGame():
@@ -77,25 +114,38 @@ def exitGame():
 
 
 def uploadMod():
-    #mod_id = input("Enter Mod ID: ")
-    #mod_id = "space_pack"
-    #mod_data = get_mod_metadata(mod_id)
-    #mod_data["json"] = str(get_local_mod(mod_data["mod_id"]))
+    mod_id = input("Enter Mod ID: ")
+    mod_data = get_mod_metadata(mod_id)
+    mod_data["json"] = str(get_local_mod(mod_id))
+    print(json.loads(postMod(mod_data).read().decode('utf-8'))["message"])
 
-    mod_data = input("Enter JSON: ")
+def postMod(mod_data):
+    response = None
     try:
-        req = Request(API_URL, method='POST', data=json.dumps(json.loads(mod_data)).encode('utf-8'),
+        req = Request(API_URL, method='POST', data=json.dumps(mod_data).encode('utf-8'),
                       headers={'Content-Type': 'application/json'})
         response = urlopen(req)
-        print(json.loads(response.read().decode('utf-8'))["message"])
+        
     except HTTPError as e:
         print(f"Error: {e.code} - {e.reason}")
+        response = e
+    return response
+
+def deleteMod(mod_id):
+    response = None
+    try:
+        req = Request(f'{API_URL}/{mod_id}', method='DELETE')
+        response = urlopen(req)
+    except HTTPError as e:
+        print(f"Error: {e.code} - {e.reason}")
+        response = e
+    return response
 
 def get_local_mod(mod_id):
     json_array = []
-
+    base_path = "mods"
     # Walk through the base directory
-    for root, dirs, files in os.walk(f"mods\\{mod_id}"):
+    for root, dirs, files in os.walk(os.path.join(base_path, mod_id)):
         for file_name in files:
             # Check if the file has a .json extension
             if file_name.endswith('.json'):
@@ -113,7 +163,9 @@ def get_local_mod(mod_id):
     return json_array
 
 def get_mod_metadata(mod_id):
-    with open(f"mods/{mod_id}/mod.metadata", "r") as metadata:
+    base_path = "mods"
+    file_name = "mod.metadata"
+    with open(os.path.join(base_path, mod_id, file_name), "r") as metadata:
         data = json.load(metadata)
         return data
 
@@ -161,21 +213,15 @@ class TitleScreen:
             self.character = choice()
             self.main()
 
-    def deleteMod(self):
+    def removeMod(self):
         mod_id = input("Enter Mod ID to Delete: ")
         delete_confirmation = input(f"Are you sure you want to delete {mod_id}? (y/n) ")
         if delete_confirmation == "n":
             self.manageMods()
         elif delete_confirmation == "y":
-            try:
-                req = Request(f'{API_URL}/{mod_id}', method='DELETE')
-                response = urlopen(req)
-                mods = json.loads(response.read().decode('utf-8'))
-                print(mods["message"])
-            except HTTPError as e:
-                print(f"Error: {e.code} - {e.reason}")
+            print(json.loads(deleteMod(mod_id).read().decode('utf-8'))["message"])
         else:
-            self.deleteMod()
+            self.removeMod()
 
 
 def print_mods(mods):

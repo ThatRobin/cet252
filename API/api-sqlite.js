@@ -1,5 +1,5 @@
 var sqlite3 = require('sqlite3').verbose();
-var db = new sqlite3.Database('ModDB');
+var db = new sqlite3.Database('ModDB.db');
 
 db.serialize(function() {
     db.run("CREATE TABLE IF NOT EXISTS mods (mod_name TEXT, username TEXT, json TEXT, version TEXT, mod_id TEXT)");
@@ -165,14 +165,25 @@ app.put('/mods/:mod_id', (req, res) => {
 app.delete('/mods/:mod_id', (req, res) => {
     const mod_id = req.params.mod_id;
 
-    db.run("DELETE FROM mods WHERE mod_id = ?", [mod_id], (err) => {
+    db.get('SELECT * FROM mods WHERE mod_id = ? LIMIT 1', [mod_id], (err, row) => {
         if(err) {
             console.error(err.message);
-            res.status(500).json({error:"Internal server error"});
+            res.status(500).json({error:'Internal server error'});
+        } else if (!row) {
+            res.status(404).json({error:'Mod not found'});
         } else {
-            res.status(200).json({message: 'Mod Successfully Deleted'});
+            db.run("DELETE FROM mods WHERE mod_id =javas ?", [mod_id], (err) => {
+                if(err) {
+                    console.error(err.message);
+                    res.status(500).json({error:"Internal server error"});
+                } else {
+                    res.status(200).json({message: 'Mod Successfully Deleted'});
+                }
+            });
         }
     });
+
+    
 });
 
 app.listen(4001, () => {
