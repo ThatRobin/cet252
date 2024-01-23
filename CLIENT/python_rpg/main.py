@@ -1,4 +1,10 @@
 import random
+import os
+import sys
+
+script_dir = os.path.dirname(os.path.realpath(__file__))
+sys.path.append(script_dir)
+os.chdir(script_dir)
 
 import registry
 import registryClasses
@@ -6,6 +12,8 @@ from player_data import PlayerData
 from menus import TitleScreen
 from registry import itemRegistry, monsterRegistry
 from screen import Screen
+
+
 
 random.seed(random.random())
 character = None

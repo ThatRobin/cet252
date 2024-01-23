@@ -204,6 +204,7 @@ raceRegistry.getBaseData()
 classRegistry.getBaseData()
 itemRegistry.getBaseData()
 monsterRegistry.getBaseData()
+os.makedirs("mods", exist_ok=True)
 for mod in os.listdir("mods"):
     raceRegistry.getModData(mod)
     classRegistry.getModData(mod)
