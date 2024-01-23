@@ -172,7 +172,7 @@ app.delete('/mods/:mod_id', (req, res) => {
         } else if (!row) {
             res.status(404).json({error:'Mod not found'});
         } else {
-            db.run("DELETE FROM mods WHERE mod_id =javas ?", [mod_id], (err) => {
+            db.run("DELETE FROM mods WHERE mod_id = ?", [mod_id], (err) => {
                 if(err) {
                     console.error(err.message);
                     res.status(500).json({error:"Internal server error"});

@@ -189,7 +189,7 @@ class TitleScreen:
         choices = ["Mod Menu:", "1) List Currently Installed Mods", "2) List Remote Mods",
                    "3) Install Mod", "4) Upload Mod", "5) Update Mod", "6) Delete Mod",
                    "7) Exit", "What would you like to do? "]
-        choicef = [None, listLocalMods, listRemoteMods, installMod, uploadMod, updateMod, self.deleteMod, self.main,
+        choicef = [None, listLocalMods, listRemoteMods, installMod, uploadMod, updateMod, self.removeMod, self.main,
                    None]
         screen = Screen(choices, choicef)
         choice = screen.display()

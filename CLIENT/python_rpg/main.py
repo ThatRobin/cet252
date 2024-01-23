@@ -13,8 +13,6 @@ from menus import TitleScreen
 from registry import itemRegistry, monsterRegistry
 from screen import Screen
 
-
-
 random.seed(random.random())
 character = None
 
