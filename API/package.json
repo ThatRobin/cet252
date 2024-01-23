@@ -2,7 +2,7 @@
   "name": "moddbapi",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "api-sqlite.js",
   "scripts": {
     "api": "node api-sqlite.js",
     "apidoc": "apidoc -i ./ -o docs/",
