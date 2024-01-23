@@ -1,0 +1,8 @@
+{
+  "name": "skeleton",
+  "stats": {
+    "initiative": 0,
+    "attack": 1,
+    "defence": 1
+  }
+}

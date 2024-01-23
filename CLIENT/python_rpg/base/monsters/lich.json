@@ -1,0 +1,8 @@
+{
+  "name": "lich",
+  "stats": {
+    "initiative": 0,
+    "attack": 2,
+    "defence": 0
+  }
+}

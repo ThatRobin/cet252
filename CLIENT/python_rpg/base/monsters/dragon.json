@@ -1,0 +1,8 @@
+{
+  "name": "dragon",
+  "stats": {
+    "initiative": 1,
+    "attack": 2,
+    "defence": 0
+  }
+}

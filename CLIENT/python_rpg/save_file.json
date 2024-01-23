@@ -1,0 +1,13 @@
+{
+    "Robin": {
+        "attack": 2,
+        "class": "warlock",
+        "defence": -2,
+        "exp": 0,
+        "initiative": 1,
+        "inventory": [],
+        "level": 0,
+        "name": "Robin",
+        "race": "tiefling"
+    }
+}
