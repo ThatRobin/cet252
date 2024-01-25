@@ -8,7 +8,7 @@ db.serialize(function() {
 var express = require('express');
 var app = express();
 
-app.use(express.json());eggewegw2e
+app.use(express.json());
 
 /**
  * @api {get} /mods/ Get all mods
